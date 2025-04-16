@@ -1,0 +1,8 @@
+{
+    "servers": {
+        "my-mcp-server-websearch": {
+            "type": "http",
+            "url": "https://us-central1-awanmasterpiece.cloudfunctions.net/websearch"
+        }
+    }
+}
