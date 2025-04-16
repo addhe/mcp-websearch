@@ -1,6 +1,6 @@
 # Web Search MCP Server
 
-A Model Context Protocol (MCP) server implementation for searching content from various news portals and Wikipedia. This application can be deployed as a Google Cloud Function.
+A Model Context Protocol (MCP) server implementation for searching content from various Indonesian news portals and Wikipedia. This application can be deployed as a Google Cloud Function.
 
 ## What is MCP?
 
@@ -36,29 +36,52 @@ MCP servers can provide three main types of capabilities:
 - Python 3.11 or higher
 - Google Cloud SDK
 - Google Cloud account with billing enabled
+- Serper API key for web search functionality
 
 ## Local Development Setup
 
-1. Create and activate a virtual environment:
+1. Clone the repository:
+```bash
+git clone git@github.com:addhe/mcp-websearch.git
+cd mcp-websearch
+```
+
+2. Create and activate a virtual environment:
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
 ```
 
-2. Install dependencies:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file with your Serper API key:
+4. Create a `.env` file with your Serper API key:
 ```
 SERPER_API_KEY=your_api_key_here
 ```
 
-4. Run locally:
+5. Run locally:
 ```bash
 python main.py
 ```
+
+## VS Code Integration
+
+1. Create `.vscode/mcp.json` with the following configuration:
+```json
+{
+    "servers": {
+        "my-mcp-server-websearch": {
+            "type": "http",
+            "url": "https://your-cloud-function-url.cloudfunctions.net/websearch"
+        }
+    }
+}
+```
+
+2. Install any MCP-compatible extension in VS Code to use the search functionality.
 
 ## Deploying to Google Cloud Functions
 
@@ -72,37 +95,40 @@ gcloud init
 
 ### Deployment Steps
 
-1. Enable required APIs:
+1. Make sure your SERPER_API_KEY is set in your environment:
 ```bash
-gcloud services enable cloudfunctions.googleapis.com
-gcloud services enable cloudbuild.googleapis.com
+export SERPER_API_KEY=your_api_key_here
 ```
 
-2. Deploy the function:
+2. Run the deployment script:
 ```bash
-gcloud functions deploy websearch \
-  --runtime python311 \
-  --trigger-http \
-  --entry-point cloud_function_handler \
-  --allow-unauthenticated \
-  --set-env-vars SERPER_API_KEY=your_api_key_here
+./deploy.sh
 ```
+
+The script will:
+- Enable required Google Cloud APIs
+- Deploy the function with Python 3.11 runtime
+- Configure the function with your SERPER_API_KEY
 
 ### Function Usage
 
-After deployment, you can call the function using HTTP POST requests with this JSON body:
+When using the MCP protocol, send HTTP POST requests with this JSON body format:
 
 ```json
 {
-    "query": "your search query",
-    "library": "detik|liputan6|cnn|wikipedia"
+    "name": "get_docs",
+    "parameters": {
+        "query": "your search query",
+        "library": "detik|liputan6|cnn|wikipedia"
+    }
 }
 ```
 
 Example response:
 ```json
 {
-    "result": "Text content from the searched portal"
+    "result": "Text content from the searched portal",
+    "type": "success"
 }
 ```
 
@@ -115,7 +141,7 @@ Available portals:
 ## Technical Details
 
 - Runtime: Python 3.11
-- HTTP Trigger
+- HTTP Trigger with MCP protocol support
 - Async implementation using httpx and aiohttp
 - BeautifulSoup4 for HTML parsing
 - Memory: 256MB (default)
@@ -123,20 +149,38 @@ Available portals:
 
 ## Environment Variables
 
-- `SERPER_API_KEY`: Your Google Serper API key for web search functionality
+- `SERPER_API_KEY`: Your Google Serper API key for web search functionality (required)
 
 ## Error Handling
 
 The function returns appropriate HTTP status codes:
-- 200: Successful request
+- 200: Successful request with MCP format response
 - 400: Missing or invalid parameters
+- 404: Function name not found
 - 500: Server error or timeout
+
+Error responses follow MCP format:
+```json
+{
+    "error": "Error message",
+    "type": "error"
+}
+```
 
 ## Limitations
 
 - Maximum timeout: 60 seconds
 - Maximum memory: 256MB (can be increased if needed)
 - Rate limits apply based on your Serper API plan
+- Currently supports only Indonesian news portals and Wikipedia
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
