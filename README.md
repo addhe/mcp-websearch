@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/addhe-mcp-websearch-badge.png)](https://mseep.ai/app/addhe-mcp-websearch)
+
 # Web Search MCP Server
 
 A Model Context Protocol (MCP) server implementation for searching content from various Indonesian news portals and Wikipedia. This application can be deployed as a Google Cloud Function.
